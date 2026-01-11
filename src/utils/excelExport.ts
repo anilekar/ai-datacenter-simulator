@@ -13,12 +13,11 @@ export function exportSimulationToExcel(state: SimulationState, scenarioName: st
     const wb = XLSX.utils.book_new()
 
   // 1. SUMMARY SHEET
-  const summaryData = [
+  const summaryData: any[][] = [
     ['AI Data Center Simulation Export'],
     [''],
     ['Scenario', scenarioName],
     ['Export Date', new Date().toLocaleString()],
-    ['Simulation Start', state.start_time?.toLocaleString() || 'N/A'],
     ['Simulation End', state.current_time?.toLocaleString() || 'N/A'],
     ['Time Step', `${state.time_step_hours} hours`],
     ['Data Points', state.history.timestamps.length],
@@ -62,7 +61,7 @@ export function exportSimulationToExcel(state: SimulationState, scenarioName: st
   XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary')
 
   // 2. TIME SERIES DATA SHEET
-  const timeSeriesData = [
+  const timeSeriesData: any[][] = [
     [
       'Timestamp',
       'Hour',
@@ -109,7 +108,7 @@ export function exportSimulationToExcel(state: SimulationState, scenarioName: st
   const leafSwitches = Array.isArray(state.cluster?.leaf_switches) ? state.cluster.leaf_switches : []
   const paths = Array.isArray(state.power_system?.paths) ? state.power_system.paths : []
 
-  const configData = [
+  const configData: any[][] = [
     ['=== FACILITY CONFIGURATION ==='],
     [''],
     ['Facility Name', state.financial_model?.facility_name || 'N/A'],
@@ -133,7 +132,7 @@ export function exportSimulationToExcel(state: SimulationState, scenarioName: st
   // Add UPS info
   const totalUPS = paths.reduce((sum, p) => sum + (p.ups_units?.length || 0), 0)
   const totalUPSCapacity = paths.reduce(
-    (sum, p) => sum + (p.ups_units?.reduce((s, u) => s + (u.capacity_kva || 0), 0) || 0), 0
+    (sum, p) => sum + (p.ups_units?.reduce((s: number, u: any) => s + (u.capacity_kva || 0), 0) || 0), 0
   )
   configData.push(
     ['Total UPS Units', totalUPS],
@@ -221,7 +220,7 @@ export function exportSimulationToExcel(state: SimulationState, scenarioName: st
 
   // 4. ACTIVE FAILURES SHEET
   if (state.active_failures && state.active_failures.length > 0) {
-    const failuresData = [
+    const failuresData: any[][] = [
       ['=== ACTIVE FAILURES ==='],
       [''],
       ['ID', 'Type', 'Name', 'Active', 'Start Time', 'Duration (hrs)', 'Capacity Reduction (%)', 'Performance Degradation (%)']
@@ -233,7 +232,7 @@ export function exportSimulationToExcel(state: SimulationState, scenarioName: st
         failure.type,
         failure.name,
         failure.isActive ? 'Yes' : 'No',
-        failure.startTime.toLocaleString(),
+        failure.startTime?.toLocaleString() || 'N/A',
         failure.durationHours,
         failure.capacityReductionPct || 0,
         failure.performanceDegradationPct || 0
@@ -245,7 +244,7 @@ export function exportSimulationToExcel(state: SimulationState, scenarioName: st
   }
 
   // 5. DETAILED POWER BREAKDOWN
-  const powerBreakdownData = [
+  const powerBreakdownData: any[][] = [
     ['=== POWER BREAKDOWN BY COMPONENT ==='],
     [''],
     ['Component', 'Power (kW)', 'Percentage of Total (%)']
@@ -264,7 +263,7 @@ export function exportSimulationToExcel(state: SimulationState, scenarioName: st
   XLSX.utils.book_append_sheet(wb, wsPowerBreakdown, 'Power Breakdown')
 
   // 6. CALCULATED METRICS SHEET
-  const calculatedData = [
+  const calculatedData: any[][] = [
     ['=== CALCULATED METRICS ==='],
     [''],
     ['Metric', 'Value', 'Unit'],
